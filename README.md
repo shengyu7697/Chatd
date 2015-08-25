@@ -1,1 +1,6 @@
-# Chatd
+Chatd
+=====
+
+## Introduction
+A lightweight chat daemon.
+
