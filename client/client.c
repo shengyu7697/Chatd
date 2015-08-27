@@ -10,11 +10,13 @@
 
 int main(int argc, char* argv[])
 {
-    int sock_fd;
+    int sock_fd, max_fd;
     struct sockaddr_in serv_name;
     int status;
     char buf[MAX_BUF];
     int nbytes;
+    int ret;
+    fd_set read_fds_master, read_fds;
 
     if (argc < 3) {
         fprintf(stderr, "Usage: %s ip_address port_number\n", argv[0]);
@@ -40,19 +42,44 @@ int main(int argc, char* argv[])
         exit(1);
     }
 
+    // set up variables for select
+    max_fd = sock_fd;
+    FD_ZERO(&read_fds_master);
+    FD_SET(STDIN_FILENO, &read_fds_master);
+    FD_SET(sock_fd, &read_fds_master);
+
     while(1) {
-        strcpy(buf, "hello");
-        write(sock_fd, buf, strlen(buf));
-        printf("[write] %s\n", buf);
+        // copy fd set
+        read_fds = read_fds_master;
 
-        memset(buf, 0, sizeof(buf));
-        nbytes = read(sock_fd, buf, sizeof(buf));
-        if (nbytes == 0)
-            break;
-        else
-            printf("[read] %s\n", buf);
+        // check to see if we can read from STDIN or sock_fd
+        ret = select(max_fd+1, &read_fds, NULL, NULL, NULL);
+        if (ret == -1) {
+            perror("Select");
+            return -1;
+        } else if (ret == 0) {
+            printf("Select timeout\n");
+            continue;
+        }
 
-        usleep(500000);
+        if (FD_ISSET(STDIN_FILENO, &read_fds)) {
+            nbytes = read(STDIN_FILENO, buf, sizeof(buf));
+            if (nbytes > 0 && buf[0] != '\n') {
+                // place a null terminator at the end of the string
+                buf[nbytes-1] = '\0';
+                write(sock_fd, buf, nbytes);
+            }
+        }
+
+        if (FD_ISSET(sock_fd, &read_fds)) {
+            memset(buf, 0, sizeof(buf));
+            nbytes = read(sock_fd, buf, sizeof(buf));
+            if (nbytes == 0) {
+                break;
+            } else {
+                printf("%s\n", buf);
+            }
+        }
     }
     close(sock_fd);
 

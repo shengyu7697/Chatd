@@ -15,7 +15,7 @@ int main(int argc, char* argv[])
     int status;
     char recv_buf[MAX_BUF], send_buf[MAX_BUF];
     int nbytes;
-    int i, ret;
+    int i, j, ret;
     fd_set read_fds_master, read_fds;
 
     if (argc < 2) {
@@ -99,9 +99,15 @@ int main(int argc, char* argv[])
                         printf("[read from fd%d] %s\n", i, recv_buf);
                     }
 
-                    sprintf(send_buf, "[fd%d] %s", i, recv_buf);
-                    write(i, send_buf, strlen(send_buf));
-                    printf("[write to fd%d] %s\n", i, send_buf);
+                    for (j = 0; j < max_fd+1; j++) {
+                        if (FD_ISSET(j, &read_fds_master)) {
+                            if (j != sock_fd && j != i) {
+                                sprintf(send_buf, "[fd%d] %s", i, recv_buf);
+                                write(j, send_buf, strlen(send_buf));
+                                printf("[write to fd%d] %s\n", j, send_buf);
+                            }
+                        }
+                    }
                 }
             }
         }
