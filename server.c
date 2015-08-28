@@ -17,6 +17,7 @@ int main(int argc, char* argv[])
     int nbytes;
     int i, j, ret;
     fd_set read_fds_master, read_fds;
+    int on = 1;
 
     if (argc < 2) {
         fprintf(stderr, "Usage: %s port_number\n", argv[0]);
@@ -27,6 +28,12 @@ int main(int argc, char* argv[])
     sock_fd = socket(AF_INET, SOCK_STREAM, 0);
     if (sock_fd == -1) {
         perror("Socket creation error");
+        exit(1);
+    }
+
+    // for "Address already in use" error message
+    if (setsockopt(sock_fd, SOL_SOCKET, SO_REUSEADDR, &on, sizeof(int)) == -1) {
+        perror("Setsockopt error");
         exit(1);
     }
 
