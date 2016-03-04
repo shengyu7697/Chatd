@@ -1,5 +1,6 @@
 #include <sys/socket.h>
 #include <netinet/in.h>
+#include <arpa/inet.h>
 #include <unistd.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -18,6 +19,7 @@ int main(int argc, char* argv[])
     int i, j, ret;
     fd_set read_fds_master, read_fds;
     int on = 1;
+    int port;
 
     if (argc < 2) {
         fprintf(stderr, "Usage: %s port_number\n", argv[0]);
@@ -40,13 +42,15 @@ int main(int argc, char* argv[])
     // server address
     my_name.sin_family = AF_INET;
     my_name.sin_addr.s_addr = INADDR_ANY;
-    my_name.sin_port = htons(atoi(argv[1]));
+    port = atoi(argv[1]);
+    my_name.sin_port = htons(port);
 
     status = bind(sock_fd, (struct sockaddr *)&my_name, sizeof(my_name));
     if (status == -1) {
         perror("Binding error");
         exit(1);
     }
+    printf("server ip=%s:%d\n", inet_ntoa(my_name.sin_addr), port);
 
     status = listen(sock_fd, 5);
     if (status == -1) {
@@ -78,7 +82,8 @@ int main(int argc, char* argv[])
                 if (i == sock_fd) {
                     // wait for a connection
                     new_fd = accept(sock_fd, (struct sockaddr *)&peer_name, &addrlen);
-                    printf("accecpt fd%d\n", new_fd);
+                    printf("accecpt fd%d ip=%s:%d\n", new_fd,
+                            inet_ntoa(peer_name.sin_addr), ntohs(peer_name.sin_port));
 
                     if (new_fd == -1) {
                         perror("Wrong connection");
