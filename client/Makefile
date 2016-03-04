@@ -1,17 +1,22 @@
-TARGET=a.out
-CC=gcc
-CFLAGS=-g -O0
-LDFLAGS=
-SRCS=$(wildcard *.c)
-OBJS=$(SRCS:.c=.o)
+TARGET = a.out
+
+CC = gcc
+CFLAGS = -O3 -Wall -Wno-unused-result
+LDFLAGS =
+RM = rm -rf
+SRCS = $(wildcard *.c)
+OBJS = $(SRCS:.c=.o)
 
 .PHONY: all clean
 
 all: $(TARGET)
 
 $(TARGET): $(OBJS)
-	$(CC) $(CFLAGS) $(OBJS) -o $@
+	$(CC) $(OBJS) -o $@ $(LDFLAGS)
+
+%.o: %.c
+	$(CC) -c $(CFLAGS) -o $@ $<
 
 clean:
-	rm -rf *.o $(TARGET)
+	$(RM) *.o $(TARGET)
 
