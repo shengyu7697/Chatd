@@ -111,6 +111,7 @@ int main(int argc, char* argv[])
                         printf("[read from fd%d] %s\n", i, recv_buf);
                     }
 
+                    // send message to connected clients
                     for (j = 0; j < max_fd+1; j++) {
                         if (FD_ISSET(j, &read_fds_master)) {
                             if (j != sock_fd && j != i) {

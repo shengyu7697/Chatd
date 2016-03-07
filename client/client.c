@@ -62,6 +62,7 @@ int main(int argc, char* argv[])
             continue;
         }
 
+        // get input from STDIN and send message to server
         if (FD_ISSET(STDIN_FILENO, &read_fds)) {
             nbytes = read(STDIN_FILENO, buf, sizeof(buf));
             if (nbytes > 0 && buf[0] != '\n') {
@@ -71,6 +72,7 @@ int main(int argc, char* argv[])
             }
         }
 
+        // recevie message from server
         if (FD_ISSET(sock_fd, &read_fds)) {
             memset(buf, 0, sizeof(buf));
             nbytes = read(sock_fd, buf, sizeof(buf));
