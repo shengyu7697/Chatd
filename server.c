@@ -8,6 +8,16 @@
 
 #define MAX_BUF 256
 
+void receiveMessage(char *buf)
+{
+    printf("%s\n", buf);
+}
+
+void sendMessage(int sock_fd, char *buf, int count)
+{
+    write(sock_fd, buf, count);
+}
+
 int main(int argc, char* argv[])
 {
     int sock_fd, new_fd, max_fd;
@@ -108,16 +118,16 @@ int main(int argc, char* argv[])
                         FD_CLR(i, &read_fds_master);
                         break;
                     } else {
-                        printf("[read from fd%d] %s\n", i, recv_buf);
+                        printf("fd%d: ", i);
+                        receiveMessage(recv_buf);
                     }
 
                     // send message to connected clients
                     for (j = 0; j < max_fd+1; j++) {
                         if (FD_ISSET(j, &read_fds_master)) {
                             if (j != sock_fd && j != i) {
-                                sprintf(send_buf, "[fd%d] %s", i, recv_buf);
-                                write(j, send_buf, strlen(send_buf));
-                                printf("[write to fd%d] %s\n", j, send_buf);
+                                sprintf(send_buf, "fd%d: %s", i, recv_buf);
+                                sendMessage(j, send_buf, strlen(send_buf));
                             }
                         }
                     }

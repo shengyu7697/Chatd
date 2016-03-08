@@ -8,6 +8,16 @@
 
 #define MAX_BUF 256
 
+void sendMessage(int sock_fd, char *buf, int count)
+{
+    write(sock_fd, buf, count);
+}
+
+void receiveMessage(char *buf)
+{
+    printf("%s\n", buf);
+}
+
 int main(int argc, char* argv[])
 {
     int sock_fd, max_fd;
@@ -68,7 +78,7 @@ int main(int argc, char* argv[])
             if (nbytes > 0 && buf[0] != '\n') {
                 // place a null terminator at the end of the string
                 buf[nbytes-1] = '\0';
-                write(sock_fd, buf, nbytes);
+                sendMessage(sock_fd, buf, nbytes);
             }
         }
 
@@ -79,7 +89,7 @@ int main(int argc, char* argv[])
             if (nbytes == 0) {
                 break;
             } else {
-                printf("%s\n", buf);
+                receiveMessage(buf);
             }
         }
     }
