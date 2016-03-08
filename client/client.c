@@ -5,17 +5,32 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include "message.h"
 
 #define MAX_BUF 256
 
+struct Message message;
+
+void initMessage(char *username)
+{
+    memset(&message, 0, sizeof(struct Message));
+    strcpy(message.name, username);
+}
+
 void sendMessage(int sock_fd, char *buf, int count)
 {
-    write(sock_fd, buf, count);
+    memset(message.data, 0, sizeof(message.data));
+    strcpy(message.data, buf);
+
+    write(sock_fd, &message, sizeof(struct Message));
 }
 
 void receiveMessage(char *buf)
 {
-    printf("%s\n", buf);
+    struct Message *message;
+    message = (struct Message *)buf;
+
+    printf("%s: %s\n", message->name, message->data);
 }
 
 int main(int argc, char* argv[])
@@ -28,10 +43,12 @@ int main(int argc, char* argv[])
     int ret;
     fd_set read_fds_master, read_fds;
 
-    if (argc < 3) {
-        fprintf(stderr, "Usage: %s ip_address port_number\n", argv[0]);
+    if (argc < 4) {
+        fprintf(stderr, "Usage: %s ip_address port_number username\n", argv[0]);
         exit(1);
     }
+
+    initMessage(argv[3]);
 
     // create a socket
     sock_fd = socket(AF_INET, SOCK_STREAM, 0);

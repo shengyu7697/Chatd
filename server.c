@@ -5,12 +5,16 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include "message.h"
 
 #define MAX_BUF 256
 
 void receiveMessage(char *buf)
 {
-    printf("%s\n", buf);
+    struct Message *message;
+    message = (struct Message *)buf;
+
+    printf("%s: %s\n", message->name, message->data);
 }
 
 void sendMessage(int sock_fd, char *buf, int count)
@@ -24,7 +28,7 @@ int main(int argc, char* argv[])
     socklen_t addrlen;
     struct sockaddr_in my_name, peer_name;
     int status;
-    char recv_buf[MAX_BUF], send_buf[MAX_BUF];
+    char recv_buf[MAX_BUF];
     int nbytes;
     int i, j, ret;
     fd_set read_fds_master, read_fds;
@@ -118,7 +122,6 @@ int main(int argc, char* argv[])
                         FD_CLR(i, &read_fds_master);
                         break;
                     } else {
-                        printf("fd%d: ", i);
                         receiveMessage(recv_buf);
                     }
 
@@ -126,8 +129,7 @@ int main(int argc, char* argv[])
                     for (j = 0; j < max_fd+1; j++) {
                         if (FD_ISSET(j, &read_fds_master)) {
                             if (j != sock_fd && j != i) {
-                                sprintf(send_buf, "fd%d: %s", i, recv_buf);
-                                sendMessage(j, send_buf, strlen(send_buf));
+                                sendMessage(j, recv_buf, sizeof(struct Message));
                             }
                         }
                     }

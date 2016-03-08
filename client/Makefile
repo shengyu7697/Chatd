@@ -1,7 +1,7 @@
 TARGET = a.out
 
 CC = gcc
-CFLAGS = -O3 -Wall -Wno-unused-result
+CFLAGS = -O3 -Wall -Wno-unused-result -I../include
 LDFLAGS =
 RM = rm -rf
 SRCS = $(wildcard *.c)
