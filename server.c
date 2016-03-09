@@ -109,6 +109,19 @@ int main(int argc, char* argv[])
                     if (new_fd > max_fd) {
                         max_fd = new_fd;
                     }
+
+                    // send "new user login" message to other connected clients
+                    for (j = 0; j < max_fd+1; j++) {
+                        if (FD_ISSET(j, &read_fds_master)) {
+                            if (j != sock_fd && j != new_fd) {
+                                struct Message message;
+                                memset(&message, 0, sizeof(struct Message));
+                                strcpy(message.name, "server");
+                                strcpy(message.data, "new user login");
+                                write(j, &message, sizeof(struct Message));
+                            }
+                        }
+                    }
                 } else {
                     // already connected socket
                     memset(recv_buf, 0, sizeof(recv_buf));
