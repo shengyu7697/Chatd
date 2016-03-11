@@ -104,6 +104,8 @@ int main(int argc, char* argv[])
             memset(buf, 0, sizeof(buf));
             nbytes = read(sock_fd, buf, sizeof(buf));
             if (nbytes == 0) {
+                // connection closed
+                printf("server disconnect\n");
                 break;
             } else {
                 receiveMessage(buf);
